@@ -1,22 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\ClasificacionContrato;
 use App\Models\Contrato;
 use App\Models\ContratistaContrato;
 use App\Models\SubCategoria;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Redirect;
 
 class ContratoController extends Controller
 {
-    
     public function index()
     {
-        //$contratos = Contrato::with('fuente')->get();
-
         $contratos = Contrato::with('fuente', 'clasificaciones', 'contratistas')->get();
         foreach ($contratos as $key => $value) {
             $contratista = ContratistaContrato::where('id_contrato', $value->id)->first();
@@ -30,48 +27,31 @@ class ContratoController extends Controller
                 $value->actividad_economica =  $sub_categoria->nombre;
             }
         }
-
-        return Inertia::render('Contrato/Index', compact('contratos'));
-    }
-
-   
-    public function create()
-    {
-        return Inertia::render('Contrato/Create');
+        return $contratos;
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'id_user_clasificador'=>'required'
-        ]);
-
-        Contrato::create($request->all());
-        return Redirect::route('contratos.index');
+       $contrato = new Contrato();
+       $contrato->save();
     }
 
-   
-    public function show(Contrato $contrato)
+    public function show($id)
     {
-        
+        $contrato = Contrato::find($id);
+        return $contrato;
+    }
+
+    public function update(Request $request, $id)
+    {
+        $contrato = Contrato::findOrFail($request->id);
+        $contrato->save();
+        return $contrato;
     }
     
-    public function edit(Contrato $contrato)
+    public function destroy($id)
     {
-        return Inertia::render('Contrato/Edit', ['contrato', $contrato]);
-    }
-
-
-    public function update(Request $request, Contrato $contrato)
-    {
-        $contrato->update($request->all());
-        return Redirect::route('contrato.index');
-    }
-
-    
-    public function destroy(Contrato $contrato)
-    {
-        $contrato->delete();
-        return Redirect::route('contratos.index');
+       $contrato = Contrato::destroy($id);
+       return $contrato;
     }
 }
