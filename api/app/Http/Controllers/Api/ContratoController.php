@@ -45,6 +45,7 @@ class ContratoController extends Controller
     public function update(Request $request, $id)
     {
         $contrato = Contrato::findOrFail($request->id);
+        $contrato->entidad_contratante = $request->entidad_contratante;
         $contrato->save();
         return $contrato;
     }
